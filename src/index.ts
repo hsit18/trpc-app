@@ -1,31 +1,30 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { inferAsyncReturnType, initTRPC } from '@trpc/server';
+import * as trpcExpress from '@trpc/server/adapters/express';
+import { appRouter } from './server';
 
 const prisma = new PrismaClient();
 const app = express();
 const port = 3000;
 
-app.get('/', (req: Request, res: Response) => {
-    res.json('Express + TypeScript Server');
-});
+const createContext = ({
+    req,
+    res,
+}: trpcExpress.CreateExpressContextOptions) => ({ req, res }); // no context
+type Context = inferAsyncReturnType<typeof createContext>;
+const t = initTRPC.context<Context>().create();
 
-app.get('/users', async (req, res) => {
-    const users = await prisma.user.findMany();
-    res.json(users)
-});
 
-app.post('/users', async (req, res) => {
-    const { name, email } = req.body
-    const user = await prisma.user.create({
-        data: {
-            name,
-            email
-        },
-    })
-    res.json(user)
-})
+app.use(
+    '/trpc',
+    trpcExpress.createExpressMiddleware({
+        router: appRouter,
+        createContext,
+    }),
+);
 
-app.delete('/user/:id', async (req, res) => {
+app.delete('/user/:id', async (req: Request, res: Response) => {
     const { id } = req.params
     const user = await prisma.user.delete({
         where: {
