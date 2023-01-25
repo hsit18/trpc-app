@@ -1,8 +1,12 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import swaggerUi from "swagger-ui-express";
 import { inferAsyncReturnType, initTRPC } from '@trpc/server';
 import * as trpcExpress from '@trpc/server/adapters/express';
-import { appRouter } from './server';
+import { appRouter } from './router';
+import { createOpenApiExpressMiddleware } from 'trpc-openapi';
+
+import { openApiDocument } from './openapi';
 
 const prisma = new PrismaClient();
 const app = express();
@@ -17,12 +21,18 @@ const t = initTRPC.context<Context>().create();
 
 
 app.use(
-    '/trpc',
+    '/api',
     trpcExpress.createExpressMiddleware({
         router: appRouter,
         createContext,
     }),
 );
+
+// Handle incoming OpenAPI requests
+app.use('/openapi', createOpenApiExpressMiddleware({ router: appRouter, createContext }));
+
+app.use('/', swaggerUi.serve);
+app.get('/', swaggerUi.setup(openApiDocument));
 
 app.delete('/user/:id', async (req: Request, res: Response) => {
     const { id } = req.params

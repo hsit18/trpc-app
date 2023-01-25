@@ -13,11 +13,22 @@ export const appRouter = t.router({
         return { users };
     }),
     createUser: t.procedure
+        .meta({
+            openapi: {
+                method: 'POST',
+                path: '/users/createUser',
+                tags: ['users'],
+                summary: 'Create new user',
+            },
+        })
         .input(z.object({ name: z.string().min(5), email: z.string().email() }))
+        .output(z.any())
         .mutation(async (req) => {
-            return await prisma.user.create({
+            const user = await prisma.user.create({
                 data: req.input,
-            })
+            });
+            return {id: user.id, name: user.name || '3dsds', email: user.email};
+
         }),
 });
 
