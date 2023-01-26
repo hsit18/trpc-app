@@ -1,9 +1,9 @@
 import { generateOpenApiDocument } from 'trpc-openapi';
 
-import { appRouter } from './router';
+import { rootRouter } from '../route';
 
 // Generate OpenAPI schema document
-export const openApiDocument = generateOpenApiDocument(appRouter, {
+export const openApiDocument = generateOpenApiDocument(rootRouter, {
     title: 'Example CRUD API',
     description: 'OpenAPI compliant REST API built using tRPC with Express',
     version: '1.0.0',
