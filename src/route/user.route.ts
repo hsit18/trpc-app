@@ -2,11 +2,24 @@ import { z } from 'zod';
 import { router, publicProcedure } from '../config/trpc'
 
 export const userRouter = router({
-    list: publicProcedure.query(async (req) => {
-        const users = await req.ctx.prisma.user.findMany();
-        return { users };
-    }),
-    getById: publicProcedure
+    getUsers: publicProcedure
+        .meta({
+            openapi: {
+                method: 'GET',
+                path: '/getUsers',
+                tags: ['users'],
+                summary: 'Get all users with posts',
+            },
+        })
+        .input(z.object({ id: z.string() }).optional())
+        .output(z.object({ users: z.object({ id: z.any(), name: z.string().nullable(), email: z.string().email(), password: z.string().nullable(), posts: z.any() }).array() }))
+        .query(async (req) => {
+            const users = await req.ctx.prisma.user.findMany({
+                include: { posts: true },
+            });
+            return { users };
+        }),
+    getUserById: publicProcedure
         .input(z.object({ id: z.string() }))
         .mutation(async (req) => {
             const user = await req.ctx.prisma.user.findUnique({
@@ -16,7 +29,7 @@ export const userRouter = router({
             });
             return user;
         }),
-    create: publicProcedure
+    createUser: publicProcedure
         .meta({
             openapi: {
                 method: 'POST',
@@ -26,14 +39,14 @@ export const userRouter = router({
             },
         })
         .input(z.object({ name: z.string().min(5), email: z.string().email() }))
-        .output(z.object({ id: z.string().uuid(), name: z.string().nullable(), email: z.string().email() }))
+        .output(z.object({ id: z.any(), name: z.string().nullable(), email: z.string().email() }))
         .mutation(async (req) => {
             const user = await req.ctx.prisma.user.create({
                 data: req.input,
             });
             return user;
         }),
-    delete: publicProcedure
+    deleteUser: publicProcedure
         .input(z.object({ id: z.string() }))
         .output(z.object({ status: z.boolean() }))
         .mutation(async (req) => {
