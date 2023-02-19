@@ -11,7 +11,7 @@ export const userRouter = router({
                 summary: 'Get all users with posts',
             },
         })
-        .input(z.object({ id: z.string() }).optional())
+        .input(z.void())
         .output(z.object({ users: z.object({ id: z.any(), name: z.string().nullable(), email: z.string().email(), password: z.string().nullable(), posts: z.any() }).array() }))
         .query(async (req) => {
             const users = await req.ctx.prisma.user.findMany({

@@ -8,12 +8,14 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+    "client": "concurrently \"npx tsc src/client.ts --watch\" \"nodemon -q dist/client.js\"",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\" \"nodemon -q dist/client.js\"",
     "database-studio": "prisma studio",
     "database-generate": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^4.8.1",
+    "@trpc/client": "^10.9.0",
     "@trpc/server": "^10.9.0",
     "@types/express": "^4.17.15",
     "@types/node": "^18.11.18",
@@ -22,6 +24,7 @@
     "dotenv": "^16.0.3",
     "eslint": "^8.31.0",
     "express": "^4.18.2",
+    "node-fetch": "2",
     "nodemon": "^2.0.20",
     "prisma": "^4.8.1",
     "superjson": "^1.12.2",
@@ -29,6 +32,10 @@
     "trpc-openapi": "^1.1.1",
     "tsx": "^3.12.1",
     "typescript": "^4.9.4",
+    "ws": "^8.12.0",
     "zod": "^3.20.2"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.4"
   }
 }

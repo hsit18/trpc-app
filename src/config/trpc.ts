@@ -1,13 +1,15 @@
 import { initTRPC, inferAsyncReturnType } from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
-import superjson from 'superjson';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { prisma } from './prisma';
+import {
+    CreateWSSContextFnOptions,
+} from '@trpc/server/adapters/ws';
 
 export const createContext = ({
     req,
     res,
-}: trpcExpress.CreateExpressContextOptions) => {
+}: trpcExpress.CreateExpressContextOptions | CreateWSSContextFnOptions) => {
     return {
         req,
         res,
@@ -17,11 +19,7 @@ export const createContext = ({
 
 export type Context = inferAsyncReturnType<typeof createContext>;
 
-export const t = initTRPC.context<Context>().meta<OpenApiMeta>().create({
-    errorFormatter({ shape }) {
-        return shape;
-    },
-});
+export const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
 
 export const router = t.router;
 
